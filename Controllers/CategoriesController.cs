@@ -33,9 +33,8 @@ namespace DemoWeb.API.Controllers
         }
 
         // PUT: api/Catergories/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
-        public async Task<IActionResult> UpdateCatergory([FromBody] UpdateCategoryCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryCommand command, CancellationToken cancellationToken)
         {
             var result = await sender.Send(command, cancellationToken);
             return result.IsSuccess ? NoContent() : BadRequest(result.Error);
@@ -43,16 +42,17 @@ namespace DemoWeb.API.Controllers
 
         // POST: api/Catergories
         [HttpPost]
-        public async Task<ActionResult<Category>> CreateCatergory([FromBody] CreateCategoryCommand request, CancellationToken cancellationToken)
+        public async Task<ActionResult<Category>> CreateCategory([FromBody] CreateCategoryCommand request, CancellationToken cancellationToken)
         {
             var result = await sender.Send(request, cancellationToken);
             return result.IsSuccess ? Ok() : BadRequest(result.Error);
         }
 
         // DELETE: api/Catergories/5
-        [HttpDelete]
-        public async Task<IActionResult> DeleteCatergory([FromBody] DeleteCategoryCommand command, CancellationToken cancellationToken)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(Guid id, CancellationToken cancellationToken)
         {
+            var command = new DeleteCategoryCommand(id);
             var result = await sender.Send(command, cancellationToken);
             return result.IsSuccess ? NoContent() : BadRequest(result.Error);
         }
