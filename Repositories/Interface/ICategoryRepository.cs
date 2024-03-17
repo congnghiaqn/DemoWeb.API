@@ -4,6 +4,10 @@ namespace DemoWeb.API.Repositories.Interface
 {
     public interface ICategoryRepository
     {
-        Task<Category> CreateAsync(Category category);
+        void CreateAsync(Category category);
+        Task<IEnumerable<Category>> GetCategories(CancellationToken cancellationToken = default);
+        Task<Category?> GetCategory(Guid id, CancellationToken cancellationToken = default);
+        void UpdateCatergory(Category category);
+        void DeleteCatergory(Category category);
     }
 }

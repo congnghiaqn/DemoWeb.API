@@ -1,105 +1,60 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DemoWeb.API.Data;
 using DemoWeb.API.Models.Domain;
-using DemoWeb.API.Models.DTO;
+using MediatR;
+using DemoWeb.API.Command.Category.CreateCategory;
+using DemoWeb.API.Command.Category.UpdateCategory;
+using DemoWeb.API.Query.Category.GetCategoryList;
+using DemoWeb.API.Command.Category.DeleteCategory;
+using DemoWeb.API.Query.Category.GetCategoryById;
 
 namespace DemoWeb.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController(AppDbContext context) : ControllerBase
+    public class CategoriesController(ISender sender) : ControllerBase
     {
 
         // GET: api/Catergories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<IActionResult> GetCategories(CancellationToken cancellationToken)
         {
-            return await context.Categories.ToListAsync();
+            var query = new GetCategoryListQuery();
+            var result = await sender.Send(query, cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : BadRequest();
         }
 
         // GET: api/Catergories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(Guid id)
+        public async Task<IActionResult> GetCategory(Guid id, CancellationToken cancellationToken)
         {
-            var catergory = await context.Categories.FindAsync(id);
-
-            if (catergory == null)
-            {
-                return NotFound();
-            }
-
-            return catergory;
+            var query = new GetCategoryByIdQuery(id);
+            var result = await sender.Send(query, cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
         }
 
         // PUT: api/Catergories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCatergory(Guid id, Category catergory)
+        [HttpPut]
+        public async Task<IActionResult> UpdateCatergory([FromBody] UpdateCategoryCommand command, CancellationToken cancellationToken)
         {
-            if (id != catergory.Id)
-            {
-                return BadRequest();
-            }
-
-            context.Entry(catergory).State = EntityState.Modified;
-
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CatergoryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var result = await sender.Send(command, cancellationToken);
+            return result.IsSuccess ? NoContent() : BadRequest(result.Error);
         }
 
         // POST: api/Catergories
         [HttpPost]
-        public async Task<ActionResult<Category>> CreateCatergory(CreateCategoryRequestDto request)
+        public async Task<ActionResult<Category>> CreateCatergory([FromBody] CreateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var category = new Category { Name = request.Name, UrlHandle = request.UrlHandle };
-            context.Categories.Add(category);
-            await context.SaveChangesAsync();
-
-            var response = new CategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                UrlHandle = category.UrlHandle,
-            };
-
-            return Ok(response);
+            var result = await sender.Send(request, cancellationToken);
+            return result.IsSuccess ? Ok() : BadRequest(result.Error);
         }
 
         // DELETE: api/Catergories/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCatergory(Guid id)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteCatergory([FromBody] DeleteCategoryCommand command, CancellationToken cancellationToken)
         {
-            var catergory = await context.Categories.FindAsync(id);
-            if (catergory == null)
-            {
-                return NotFound();
-            }
-
-            context.Categories.Remove(catergory);
-            await context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CatergoryExists(Guid id)
-        {
-            return context.Categories.Any(e => e.Id == id);
+            var result = await sender.Send(command, cancellationToken);
+            return result.IsSuccess ? NoContent() : BadRequest(result.Error);
         }
     }
 }
