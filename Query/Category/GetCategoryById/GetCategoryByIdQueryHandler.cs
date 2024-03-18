@@ -1,11 +1,12 @@
-﻿using DemoWeb.API.Messaging;
+﻿using AutoMapper;
+using DemoWeb.API.Messaging;
 using DemoWeb.API.Models.DTO;
 using DemoWeb.API.Repositories.Interface;
 using DemoWeb.API.Shared;
 
 namespace DemoWeb.API.Query.Category.GetCategoryById
 {
-    public class GetCategoryByIdQueryHandler(ICategoryRepository categoryRepository) : IQueryHandler<GetCategoryByIdQuery, CategoryDto>
+    public class GetCategoryByIdQueryHandler(ICategoryRepository categoryRepository, IMapper mapper) : IQueryHandler<GetCategoryByIdQuery, CategoryDto>
     {
         public async Task<Result<CategoryDto>> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
         {
@@ -14,7 +15,7 @@ namespace DemoWeb.API.Query.Category.GetCategoryById
             {
                 return Result.Failure<CategoryDto>(new Error("Category.NotFound", "Category not exist."));
             }
-            var response = new CategoryDto() { Name = category.Name, UrlHandle = category.UrlHandle, Id = category.Id };
+            var response = mapper.Map<CategoryDto>(category);
             return Result.Success(response);
         }
     }

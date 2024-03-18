@@ -1,4 +1,5 @@
 using DemoWeb.API.Data;
+using DemoWeb.API.Mappings;
 using DemoWeb.API.Repositories.Implementation;
 using DemoWeb.API.Repositories.Interface;
 using MediatR;
@@ -26,7 +27,10 @@ builder
 builder.Services.AddMediatR(config => config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DemoWebConnectionString")));
-
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddProfile<MappingProfile>();
+});
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 var app = builder.Build();
