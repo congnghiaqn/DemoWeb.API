@@ -13,7 +13,6 @@ namespace DemoWeb.API.Controllers
     [ApiController]
     public class CategoriesController(ISender sender) : ControllerBase
     {
-
         // GET: api/Catergories
         [HttpGet]
         public async Task<IActionResult> GetCategories(CancellationToken cancellationToken)
